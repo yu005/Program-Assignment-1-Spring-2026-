@@ -146,6 +146,27 @@
     .route-box { margin-top: 14px; padding: 14px; background: #fafafa; border-radius: var(--radius-sm); border: 1px solid var(--line-2); }
     .route-box h3 { margin: 0 0 8px; font-size: 15px; font-weight: 700; }
     .route { font-family: var(--mono); line-height: 1.8; word-break: break-word; font-size: 14px; }
+    /* ─── Streamlit Replica ─── */
+    .st-app { display: flex; background: #fff; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; min-height: 480px; }
+    .st-sidebar { width: 320px; background: #f0f2f6; padding: 24px; border-right: 1px solid var(--line); flex-shrink: 0; }
+    .st-sidebar h3 { font-size: 15px; margin: 0 0 20px; font-weight: 600; color: #31333f; }
+    .st-field { margin-bottom: 20px; }
+    .st-field label { display: block; font-size: 13px; color: #31333f; margin-bottom: 8px; font-weight: 500; }
+    .st-field input[type="range"] { width: 100%; cursor: pointer; accent-color: #ff4b4b; }
+    .st-val { text-align: right; font-size: 13px; color: #31333f; margin-top: 4px; font-family: var(--mono); }
+    .st-sidebar hr { border: none; border-top: 1px solid #e6e9ef; margin: 20px 0; }
+    .st-btn { width: 100%; background: #fff; border: 1px solid #c9cdd4; color: #31333f; border-radius: 4px; padding: 8px 12px; font-size: 15px; cursor: pointer; transition: border-color .15s, color .15s; }
+    .st-btn:hover { border-color: #ff4b4b; color: #ff4b4b; }
+    .st-main { flex: 1; padding: 32px 48px; background: #fff; }
+    .st-main h1 { font-size: 24px; font-weight: 700; color: #31333f; margin: 0 0 24px; border-bottom: 1px solid #e6e9ef; padding-bottom: 12px; }
+    .st-main h3 { font-size: 18px; font-weight: 600; margin: 24px 0 12px; color: #31333f; }
+    .st-info, .st-info-bold { background: #e8f0fe; color: #1a4387; padding: 14px 16px; border-radius: 4px; font-size: 14px; }
+    .st-success { background: #e2f5e8; color: #116829; padding: 14px 16px; border-radius: 4px; font-size: 14px; margin-bottom: 20px; }
+    .st-error { background: #fde8e8; color: #9c1c1c; padding: 14px 16px; border-radius: 4px; font-size: 14px; }
+    .st-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .st-metric { padding: 4px 0; }
+    .st-metric .lbl { font-size: 13px; color: #757984; margin-bottom: 4px; }
+    .st-metric .val { font-size: 22px; font-weight: 700; color: #31333f; font-family: var(--mono); }
 
     /* ─── Graph ─── */
     .graph-wrap { padding: 0; overflow: hidden; }
@@ -511,6 +532,63 @@
           <div class="algo-item"><strong>Branch-and-Bound</strong><span>超過限制或不可能超越目前最佳解時提前剪枝。</span></div>
           <div class="algo-item"><strong>Best-First Search</strong><span>若要優先走高分路徑，可改以評估值作為展開順序。</span></div>
           <div class="algo-item"><strong>A* / Greedy / DP</strong><span>A* 重估成本、Greedy 快但不保證最佳、DP 適合重複狀態多的情境。</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ═══════════ Streamlit Replica ═══════════ -->
+  <section id="sec-streamlit" style="margin-top:40px;">
+    <div class="section-label">Python 系統復刻版</div>
+    <div class="section-title">Streamlit 使用者介面 (第八組)</div>
+    <div class="section-desc">以下展示 <code>park-planner-system-main/app.py</code> 中的系統介面。這是一份完整復刻 Python Streamlit 版面的互動程式，共用相同的底層 DFS + B&B 演算法，並提供高自由度的限制參數拖曳條。</div>
+    <div class="st-app">
+      <div class="st-sidebar">
+        <h3>請輸入您的遊園限制</h3>
+        <div class="st-field">
+          <label>時間上限 (分鐘)</label>
+          <input type="range" id="stTime" min="0" max="600" value="70">
+          <div class="st-val" id="stTimeVal">70</div>
+        </div>
+        <div class="st-field">
+          <label>預算上限 (新台幣)</label>
+          <input type="range" id="stCost" min="0" max="500" value="300">
+          <div class="st-val" id="stCostVal">300</div>
+        </div>
+        <div class="st-field">
+          <label>體力上限 (1-30)</label>
+          <input type="range" id="stEnergy" min="1" max="30" value="15">
+          <div class="st-val" id="stEnergyVal">15</div>
+        </div>
+        <div class="st-field">
+          <label>可接受曝曬指數上限</label>
+          <input type="range" id="stSun" min="1" max="30" value="10">
+          <div class="st-val" id="stSunVal">10</div>
+        </div>
+        <hr/>
+        <button id="stRunBtn" class="st-btn">開始計算最佳路線</button>
+      </div>
+      <div class="st-main">
+        <h1>演算法概論：主題樂園最佳遊園計畫系統 (第八組)</h1>
+        <div id="stDefaultMsg" class="st-info">請在左側調整您的偏好與資源限制，然後點擊「開始計算最佳路線」。</div>
+        
+        <div id="stResultArea" style="display:none;">
+          <div class="st-success">成功生成最佳計畫！</div>
+          <h3>推薦遊園路線</h3>
+          <div class="st-info" id="stRouteText"></div>
+          
+          <h3>行程數據統計</h3>
+          <div class="st-metrics">
+            <div class="st-metric"><div class="lbl">遊玩設施數量</div><div class="val" id="stMetricCount"></div></div>
+            <div class="st-metric"><div class="lbl">總偏好分數</div><div class="val" id="stMetricPref"></div></div>
+            <div class="st-metric"><div class="lbl">總花費時間</div><div class="val" id="stMetricTime"></div></div>
+            <div class="st-metric"><div class="lbl">總花費金額</div><div class="val" id="stMetricCost"></div></div>
+            <div class="st-metric"><div class="lbl">體力消耗</div><div class="val" id="stMetricEnergy"></div></div>
+            <div class="st-metric"><div class="lbl">累積曝曬指數</div><div class="val" id="stMetricSun"></div></div>
+          </div>
+        </div>
+        
+        <div id="stErrorArea" style="display:none;">
+          <div class="st-error">抱歉！在您指定的極限條件下，找不到任何一條可以回到入口的可行路線。請試著放寬限制（例如增加時間或預算）。</div>
         </div>
       </div>
     </div>
@@ -1344,6 +1422,36 @@ document.querySelectorAll('[data-case]').forEach(btn => {
 el('runBtn').addEventListener('click', runDemo);
 el('resetBtn').addEventListener('click', resetDemo);
 setInputs(cases[1]);
+// ─── Streamlit Replica ───
+document.querySelectorAll('.st-field input').forEach(input => {
+  input.addEventListener('input', e => el(e.target.id + 'Val').textContent = e.target.value);
+});
+el('stRunBtn').addEventListener('click', () => {
+  const cfg = {
+    name: 'Streamlit Request',
+    time_limit: Number(el('stTime').value),
+    budget_limit: Number(el('stCost').value),
+    energy_limit: Number(el('stEnergy').value),
+    sun_limit: Number(el('stSun').value)
+  };
+  const result = runSearch(cfg);
+  el('stDefaultMsg').style.display = 'none';
+  if(result.best) {
+    el('stErrorArea').style.display = 'none';
+    el('stResultArea').style.display = 'block';
+    const routeStr = result.best.full_route.map(v => `**${vertices[v].zh} (${v})**`).join(' ➔ ');
+    el('stRouteText').innerHTML = routeStr.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    el('stMetricCount').textContent = result.best.attractions + ' 個';
+    el('stMetricPref').textContent = result.best.preference + ' 分';
+    el('stMetricTime').textContent = result.best.total_time + ' 分鐘';
+    el('stMetricCost').textContent = result.best.cost + ' 元';
+    el('stMetricEnergy').textContent = result.best.energy + ' / ' + cfg.energy_limit;
+    el('stMetricSun').textContent = result.best.sun_exposure + ' / ' + cfg.sun_limit;
+  } else {
+    el('stResultArea').style.display = 'none';
+    el('stErrorArea').style.display = 'block';
+  }
+});
 resetDemo();
 </script>
 </body>
