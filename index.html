@@ -853,37 +853,39 @@ renderDataModel();
 function renderSearchTree(){
   const svg = el('treeSvg');
   const nodes = [
-    { id: 'root', label: 'V1', x: 480, y: 30, type: 'start' },
-    { id: 'v2', label: 'V1→V2', x: 240, y: 100, type: 'expand' },
-    { id: 'v3', label: 'V1→V3', x: 720, y: 100, type: 'expand' },
-    { id: 'v2_v3', label: '→V3', x: 80, y: 180, type: 'expand' },
-    { id: 'v2_v4', label: '→V4', x: 240, y: 180, type: 'expand' },
-    { id: 'v2_v1', label: '→V1✓', x: 400, y: 180, type: 'cycle' },
-    { id: 'v2_v4_v5', label: '→V5', x: 160, y: 260, type: 'expand' },
-    { id: 'v2_v4_v6', label: '→V6', x: 300, y: 260, type: 'expand' },
-    { id: 'v2_v4_v2b', label: '→V2→V1✓', x: 240, y: 340, type: 'best', subLabel: '遊玩V2,V4' },
-    { id: 'v2_v4_v5_prune', label: '超時剪枝', x: 110, y: 340, type: 'pruned' },
-    { id: 'v2_v4_v6_prune', label: '上界剪枝', x: 350, y: 340, type: 'pruned' },
-    { id: 'v3_v6', label: '→V6', x: 640, y: 180, type: 'expand' },
-    { id: 'v3_v2', label: '→V2', x: 800, y: 180, type: 'expand' },
-    { id: 'v3_v1', label: '→V1✓', x: 720, y: 260, type: 'cycle', subLabel: '遊玩V3' },
-    { id: 'v3_prune', label: '支配剪枝', x: 860, y: 260, type: 'pruned' },
+    { id: 'root', label: 'V1 起點', x: 480, y: 30, type: 'start', subLabel: 't:0, c:0' },
+    { id: 'v2', label: '遊玩 V2', x: 260, y: 120, type: 'expand', subLabel: 't:20, c:150, p:9' },
+    { id: 'v3', label: '遊玩 V3', x: 700, y: 120, type: 'expand', subLabel: 't:24, c:100, p:6' },
+    { id: 'v2_v3', label: '遊玩 V3', x: 80, y: 210, type: 'expand', subLabel: 't:50, c:250, p:15' },
+    { id: 'v2_v4', label: '遊玩 V4', x: 260, y: 210, type: 'expand', subLabel: 't:55, c:270, p:17' },
+    { id: 'v2_v1', label: '回 V1✓', x: 440, y: 210, type: 'cycle', subLabel: 't:25 (僅玩V2)' },
+    { id: 'v2_v4_v5', label: '遊玩 V5', x: 100, y: 310, type: 'expand', subLabel: 't:90 (超時)' },
+    { id: 'v2_v4_v6', label: '遊玩 V6', x: 260, y: 310, type: 'expand', subLabel: 't:77 (超時)' },
+    { id: 'v2_v4_v2b', label: '經 V2 回 V1✓', x: 460, y: 310, type: 'best', subLabel: 't:70, c:270, p:17' },
+    { id: 'v2_v4_v5_prune', label: '超時剪枝', x: 100, y: 370, type: 'pruned' },
+    { id: 'v2_v4_v6_prune', label: '界限/超時', x: 260, y: 370, type: 'pruned' },
+    { id: 'v3_v6', label: '遊玩 V6', x: 600, y: 210, type: 'expand', subLabel: 't:42, c:150, p:11' },
+    { id: 'v3_v2', label: '遊玩 V2', x: 700, y: 210, type: 'expand', subLabel: 't:45, c:250, p:15' },
+    { id: 'v3_v1', label: '回 V1✓', x: 820, y: 210, type: 'cycle', subLabel: 't:28 (僅玩V3)' },
+    { id: 'v3_v6_prune', label: '支配剪枝', x: 600, y: 270, type: 'pruned' },
+    { id: 'v3_v2_prune', label: '支配剪枝', x: 700, y: 270, type: 'pruned' },
   ];
   const treeEdges = [
-    { from: 'root', to: 'v2', type: 'normal' },
-    { from: 'root', to: 'v3', type: 'normal' },
-    { from: 'v2', to: 'v2_v3', type: 'normal' },
-    { from: 'v2', to: 'v2_v4', type: 'normal' },
-    { from: 'v2', to: 'v2_v1', type: 'normal' },
-    { from: 'v2_v4', to: 'v2_v4_v5', type: 'normal' },
-    { from: 'v2_v4', to: 'v2_v4_v6', type: 'normal' },
-    { from: 'v2_v4', to: 'v2_v4_v2b', type: 'best' },
+    { from: 'root', to: 'v2', type: 'normal', label: 'wt:5, Wt:15, Wc:150' },
+    { from: 'root', to: 'v3', type: 'normal', label: 'wt:4, Wt:20, Wc:100' },
+    { from: 'v2', to: 'v2_v3', type: 'normal', label: 'wt:6, Wt:20, Wc:100' },
+    { from: 'v2', to: 'v2_v4', type: 'normal', label: 'wt:10, Wt:25, Wc:120' },
+    { from: 'v2', to: 'v2_v1', type: 'normal', label: 'wt:5 (回程)' },
+    { from: 'v2_v4', to: 'v2_v4_v5', type: 'normal', label: 'wt:5, Wt:30' },
+    { from: 'v2_v4', to: 'v2_v4_v6', type: 'normal', label: 'wt:12, Wt:10' },
+    { from: 'v2_v4', to: 'v2_v4_v2b', type: 'best', label: 'wt:10(回V2) + wt:5(回V1)' },
     { from: 'v2_v4_v5', to: 'v2_v4_v5_prune', type: 'pruned' },
     { from: 'v2_v4_v6', to: 'v2_v4_v6_prune', type: 'pruned' },
-    { from: 'v3', to: 'v3_v6', type: 'normal' },
-    { from: 'v3', to: 'v3_v2', type: 'normal' },
-    { from: 'v3_v6', to: 'v3_v1', type: 'normal' },
-    { from: 'v3_v2', to: 'v3_prune', type: 'pruned' },
+    { from: 'v3', to: 'v3_v6', type: 'normal', label: 'wt:8, Wt:10' },
+    { from: 'v3', to: 'v3_v2', type: 'normal', label: 'wt:6, Wt:15' },
+    { from: 'v3', to: 'v3_v1', type: 'normal', label: 'wt:4 (回程)' },
+    { from: 'v3_v6', to: 'v3_v6_prune', type: 'pruned' },
+    { from: 'v3_v2', to: 'v3_v2_prune', type: 'pruned' },
   ];
   svg.innerHTML = '';
   const nodeMap = {};
@@ -895,6 +897,25 @@ function renderSearchTree(){
     line.setAttribute('x2', to.x); line.setAttribute('y2', to.y - 16);
     line.setAttribute('class', `tree-edge ${e.type === 'pruned' ? 'pruned' : ''} ${e.type === 'best' ? 'best' : ''}`);
     svg.appendChild(line);
+    
+    if(e.label){
+      const mx = (from.x + to.x) / 2;
+      const my = (from.y + 16 + to.y - 16) / 2;
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', mx);
+      t.setAttribute('y', my);
+      t.setAttribute('fill', e.type === 'best' ? '#000' : '#555');
+      t.setAttribute('font-size', '10.5');
+      t.setAttribute('font-family', 'var(--mono)');
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('dominant-baseline', 'central');
+      t.setAttribute('font-weight', e.type === 'best' ? '800' : '600');
+      t.setAttribute('stroke', '#fff');
+      t.setAttribute('stroke-width', '4');
+      t.setAttribute('paint-order', 'stroke');
+      t.textContent = e.label;
+      svg.appendChild(t);
+    }
   }
   for(const n of nodes){
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
