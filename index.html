@@ -214,7 +214,7 @@
     /* ─── Search Tree ─── */
     .tree-svg { width: 100%; display: block; }
     .tree-node rect { rx: 6; ry: 6; stroke-width: 1.5; }
-    .tree-node text { font-family: var(--mono); font-size: 11px; fill: #1a1a1a; text-anchor: middle; dominant-baseline: central; }
+    .tree-node text { font-family: var(--mono); font-size: 11px; text-anchor: middle; dominant-baseline: central; }
     .tree-edge { stroke: #ccc; stroke-width: 1.5; fill: none; }
     .tree-edge.pruned { stroke: #aaa; stroke-dasharray: 5 4; }
     .tree-edge.best { stroke: #000; stroke-width: 2.5; }
@@ -727,12 +727,12 @@ function renderDataModel(){
     { x: 60, y: 40, w: 200, h: 200, title: 'Vertex (頂點)', fields: ['id: String (V1~V6)','zh: String (中文名)','play_time: Int (分鐘)','cost: Int (元)','energy: Int (1~10)','preference: Int (分數)'] },
     { x: 350, y: 40, w: 200, h: 160, title: 'Edge (邊)', fields: ['from: Vertex','to: Vertex','travel_time: Int','sun_exposure: Int (1~5)'] },
     { x: 640, y: 40, w: 200, h: 180, title: 'Constraint (限制)', fields: ['time_limit: Int','budget_limit: Int','energy_limit: Int','sun_limit: Int | null'] },
-    { x: 350, y: 230, w: 200, h: 80, title: 'Solution (解)', fields: ['route: Vertex[]','selected: Vertex[]'] },
+    { x: 350, y: 260, w: 200, h: 80, title: 'Solution (解)', fields: ['route: Vertex[]','selected: Vertex[]'] },
   ];
   const arrows = [
     { from: [260, 120], to: [350, 120], label: '相鄰' },
     { from: [550, 120], to: [640, 120], label: '過濾' },
-    { from: [450, 200], to: [450, 230], label: '產生' },
+    { from: [450, 200], to: [450, 260], label: '產生' },
   ];
   svg.innerHTML = '<defs><marker id="arrowM" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#666"/></marker></defs>';
   for(const a of arrows){
@@ -960,15 +960,15 @@ renderSearchTree();
 // ─── Derivation Steps (Section 2-4) ───
 (function(){
   const steps = [
-    { num: '1', type: '', title: '從 V1 出發', body: 'DFS 從入口廣場 V1 開始，累積資源 = (time:0, cost:0, energy:0, sun:0)。V1 的鄰居有 V2 和 V3。' },
-    { num: '2', type: '', title: '展開 V1 → V2（遊玩）', body: '選擇遊玩 V2（雲霄飛車）。<br/>移動時間 +5，遊玩時間 +15，費用 +150，體力 +8，曝曬 +2<br/>累積 = (time:20, cost:150, energy:8, sun:2) <span class="tag-inline tag-expand">✓ 可行</span>' },
-    { num: '3', type: '', title: '展開 V2 → V4（遊玩）', body: '選擇遊玩 V4（鬼屋）。<br/>移動時間 +10，遊玩時間 +25，費用 +120，體力 +6，曝曬 +3<br/>累積 = (time:55, cost:270, energy:14, sun:5) <span class="tag-inline tag-expand">✓ 可行</span>' },
-    { num: '4', type: 'pruned', title: '展開 V4 → V5', body: '若遊玩 V5（漂漂河），play_time +30，累積時間 = 55+5+30 = 90 > 70。<span class="tag-inline tag-prune">✗ 超時剪枝</span>' },
-    { num: '5', type: '', title: '展開 V4 → V6', body: '若遊玩 V6（旋轉木馬），已選 {V2,V4}=2項。加上 V6 最多 3 項，但上界偏好 9+8+5=22，而已有解偏好 17。<br/>需要檢查是否能改善 → 繼續展開...' },
-    { num: '6', type: 'best', title: '展開 V4 → V2 → V1（回到起點）', body: '從 V4 經過 V2（不重複遊玩）回到 V1。<br/>總時間 = 15+5+10+10+5 = 45+25 = 70 分鐘<br/>路線：V1→V2→V4→V2→V1，遊玩 {V2, V4} = 2 項<br/>偏好 = 9+8 = 17 <span class="tag-inline tag-update">★ 更新最佳解</span>' },
-    { num: '7', type: '', title: '展開 V1 → V3 側', body: '從 V1 走 V3，嘗試各種路線組合。V3 偏好=6 < V2 偏好=9，且時間限制緊湊。' },
-    { num: '8', type: 'pruned', title: '上界剪枝 & 支配剪枝', body: '大部分 V3 側的分支在上界估算後，設施數無法超過 2 項（或偏好無法超過 17），被 Branch-and-Bound 剪枝。<span class="tag-inline tag-prune">✗ 界限剪枝</span>' },
-    { num: '9', type: 'best', title: '搜尋結束', body: '<strong>最佳解確認</strong>：V1 → V2 → V4 → V2 → V1<br/>設施 2 項（V2 雲霄飛車, V4 鬼屋）<br/>總時間 70 分鐘 ｜ 花費 270 元 ｜ 體力 14 ｜ 偏好 17' },
+    { num: '1', type: '', title: '狀態初始化：從 V1 出發', body: '系統將入口廣場 V1 設為起點。此時尚未遊玩任何設施。<br/>目前資源：(時間: 0, 花費: 0, 體力: 0)。<br/>候選路線有兩條：前往 V2 或前往 V3。優先嘗試 V2。' },
+    { num: '2', type: '', title: '展開分支：V1 → V2（選擇遊玩）', body: '抵達 V2（雲霄飛車），決定遊玩。<br/>移動時間 +5，遊玩時間 +15，花費 +150，體力 +8。<br/>累積資源：(時間: 20, 花費: 150, 體力: 8)。<br/>各項資源皆在限制內（時間20≤70，預算150≤300），<span class="tag-inline tag-expand">✓ 狀態可行，繼續向下展開</span>。' },
+    { num: '3', type: '', title: '展開分支：V2 → V4（選擇遊玩）', body: '從 V2 移動到 V4（鬼屋），決定遊玩。<br/>移動時間 +10，遊玩時間 +25，花費 +120，體力 +6。<br/>累積資源：(時間: 55, 花費: 270, 體力: 14)。<br/>此時已選設施：{V2, V4}。<br/>資源仍未超限，<span class="tag-inline tag-expand">✓ 狀態可行，繼續搜尋</span>。' },
+    { num: '4', type: 'pruned', title: '嘗試延伸：V4 → V5（限制剪枝）', body: '若接著前往 V5（漂漂河）並遊玩：<br/>移動時間 +5，遊玩時間 +30。<br/>累積時間會變成 55 + 5 + 30 = 90 分鐘，超過了上限 70 分鐘。<br/>因此這條路線被排除，<span class="tag-inline tag-prune">✗ 超時剪枝</span>。' },
+    { num: '5', type: 'pruned', title: '嘗試延伸：V4 → V6（上界剪枝）', body: '若前往 V6（旋轉木馬），雖然時間與預算可能允許，但系統會計算「樂觀上界」。<br/>若加入 V6，最多可玩 3 項設施，但總時間將逼近極限，且後續無法順利回到 V1。<br/>Branch-and-Bound 發現此分支無法產生更佳的完整回路，因此提早終止，<span class="tag-inline tag-prune">✗ 界限剪枝</span>。' },
+    { num: '6', type: 'best', title: '產生回路：V4 → V2 → V1（更新最佳解）', body: '由於無法再玩新設施，必須返回 V1。路線選擇原路折返：從 V4 經過 V2 再回 V1。<br/>因為 V2 已經玩過，這次只產生「移動時間」而不產生「遊玩時間/花費」。<br/>回程時間：V4→V2 (10) + V2→V1 (5) = 15 分鐘。<br/>總時間：55 + 15 = 70 分鐘。剛好符合限制！<br/>獲得第一個可行解：遊玩 2 項設施 (V2, V4)，偏好總分 17。<br/><span class="tag-inline tag-update">★ 更新目前最佳解</span>' },
+    { num: '7', type: '', title: '展開另側：V1 → V3（尋找更好解）', body: 'DFS 回溯到起點，改走另一條分支：V1 → V3（摩天輪）。<br/>移動時間 +4，遊玩時間 +20，花費 +100。<br/>累積資源：(時間: 24, 花費: 100, 體力: 2)。' },
+    { num: '8', type: 'pruned', title: 'V3 側的分支探索（狀態支配）', body: '在 V3 繼續探索 V6 等設施時，系統會比對目前最佳解（2 項設施，偏好 17）。<br/>V3 側的路線因為設施偏好較低（例如 V3(6) + V6(5) = 11），或因為資源消耗較大，在上界估算或狀態支配檢查中被判定無法超越目前最佳解。<br/><span class="tag-inline tag-prune">✗ 支配/界限剪枝</span>' },
+    { num: '9', type: 'best', title: '搜尋結束，輸出結果', body: '所有可能路線皆已探索或剪枝完畢。<br/><strong>確認最終最佳解</strong>：路線 V1 → V2 → V4 → V2 → V1<br/>遊玩設施：2 項（V2 雲霄飛車, V4 鬼屋）<br/>最終數據：總時間 70 分鐘 ｜ 總花費 270 元 ｜ 消耗體力 14 ｜ 總偏好 17' },
   ];
   const container = el('derivationSteps');
   steps.forEach(s => {
